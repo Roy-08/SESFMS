@@ -1,5 +1,5 @@
  "use client";
-
+export const dynamic = "force-dynamic";
 import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
@@ -140,4 +140,5 @@ export default function LoginPage() {
       </motion.div>
     </div>
   );
+
 } 
