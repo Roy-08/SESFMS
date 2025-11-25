@@ -1,14 +1,39 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AdminAuth from "./AdminAuth";
 import UserTree from "@/components/UserTree";
 import AddUserButton from "@/components/AddUserButton";
 
 export default function AdminPageClient({ userTree }) {
+  const [tree, setTree] = useState(userTree);
   const [search, setSearch] = useState("");
 
-  // 🔍 Filter recursively (UNCHANGED)
+  // 🔥 Fetch fresh users from API
+  const refreshUsers = async () => {
+    try {
+      const res = await fetch("/api/getUsers", {
+        cache: "no-store",
+      });
+
+      const data = await res.json();
+      if (data.userTree) setTree(data.userTree);
+    } catch (err) {
+      console.error("FETCH ERROR:", err);
+    }
+  };
+
+  // Load fresh users once page loads
+  useEffect(() => {
+    refreshUsers();
+  }, []);
+
+  // Pass refresh function to Add/Delete components later
+  useEffect(() => {
+    window.refreshUsers = refreshUsers;
+  }, []);
+
+  // 🔍 Filter recursively
   const filterTree = (nodes, q) => {
     if (!q) return nodes;
     const query = q.toLowerCase();
@@ -30,17 +55,15 @@ export default function AdminPageClient({ userTree }) {
       .filter(Boolean);
   };
 
-  const filteredTree = filterTree(userTree, search);
+  const filteredTree = filterTree(tree, search);
 
   return (
     <>
-
       {/* SEARCH + ADD */}
       <div className="flex items-center justify-between mb-8">
-
         {/* SEARCH BAR */}
         <div className="relative w-80">
-          <span className="absolute left-4 top-2.5 text-black text-lg opacity-80">
+          <span className="absolute left-4 top-2.5 text-black-300 text-lg opacity-80">
             🔍
           </span>
 
@@ -61,7 +84,7 @@ export default function AdminPageClient({ userTree }) {
           />
         </div>
 
-        {/* ADD BUTTON (kept same component, just UI inside AddUserButton updated) */}
+        {/* ADD BUTTON */}
         <AddUserButton />
       </div>
 
