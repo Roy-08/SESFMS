@@ -31,7 +31,9 @@ const UserSchema = new mongoose.Schema({
 
   linkId: { type: String, unique: true, sparse: true },
   links: { type: [LinkSchema], default: [] },
+  firstTimePasswordSet: { type: Boolean, default: false }
 });
 
 const User = mongoose.models.User || mongoose.model("User", UserSchema);
 export default User;
+
