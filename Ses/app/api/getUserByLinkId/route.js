@@ -24,8 +24,14 @@ export async function GET(req) {
       );
     }
 
+    // ✅ Add this field — detects if password already exists
+    const hasPassword = Boolean(user.password);
+
     return new Response(
-      JSON.stringify({ email: user.email }),
+      JSON.stringify({
+        email: user.email,
+        hasPassword,            // ← send this to frontend
+      }),
       { status: 200 }
     );
 
