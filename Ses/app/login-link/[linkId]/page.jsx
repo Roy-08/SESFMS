@@ -86,7 +86,7 @@ export default function LinkLoginPage() {
       toast.success("Login successful");
 
       // 3️⃣ Redirect to old user page
-      router.push(`/${linkId}`);
+      router.push(`login/${linkId}`);
     } catch (err) {
       console.error(err);
       toast.error("Unexpected error");
@@ -173,4 +173,5 @@ export default function LinkLoginPage() {
     </div>
   );
 }
+
 
