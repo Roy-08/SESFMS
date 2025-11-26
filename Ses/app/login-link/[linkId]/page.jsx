@@ -16,36 +16,47 @@ export default function LinkLoginPage() {
   const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
 
- 
-useEffect(() => {
-  async function fetchUser() {
-    try {
-      const res = await fetch(`/api/getUserByLinkId?linkId=${linkId}`);
-      const data = await res.json();
+  useEffect(() => {
+    async function fetchUser() {
+      try {
+        const res = await fetch(`/api/getUserByLinkId?linkId=${linkId}`);
+        const data = await res.json();
 
-      if (!res.ok) {
-        toast.error("Invalid login link");
+        if (!res.ok) {
+          toast.error(data.error || "Invalid login link");
+          setLoadingUser(false);
+          return;
+        }
+
+        // If user already has password: check if client has a valid session
+        if (data.firstTimePasswordSet) {
+          // Ask backend if auth_token session is valid
+          const authCheck = await fetch(`/api/checkAuth`, { method: "GET" });
+
+          if (authCheck.ok) {
+            // session valid -> go to user's main page
+            router.push(`/login/${linkId}`);
+            return;
+          } else {
+            // session not valid -> send user to normal login (not the reset page)
+            router.push(`/login`);
+            return;
+          }
+        }
+
+        // otherwise show the set-password UI
+        setEmail(data.email);
+      } catch (err) {
+        console.error(err);
+        toast.error("Unable to load user");
+      } finally {
         setLoadingUser(false);
-        return;
       }
-
-      // ✅ ADD THIS CHECK
-      if (data.hasPassword) {
-        router.push(`/login/${linkId}`);
-        return;
-      }
-
-      setEmail(data.email);
-    } catch (err) {
-      toast.error("Unable to load user");
-    } finally {
-      setLoadingUser(false);
     }
-  }
 
-  fetchUser();
-}, [linkId]);
-
+    fetchUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [linkId]);
 
   const doLogin = async (e) => {
     e.preventDefault();
@@ -75,7 +86,7 @@ useEffect(() => {
 
       toast.success("Password set successfully");
 
-      // 2️⃣ Login user immediately
+      // 2️⃣ Login user immediately (assumes /api/login will set auth_token cookie)
       const loginRes = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -92,7 +103,7 @@ useEffect(() => {
 
       toast.success("Login successful");
 
-      // 3️⃣ Redirect to old user page
+      // 3️⃣ Redirect to user's main page (TreePage)
       router.push(`/login/${linkId}`);
     } catch (err) {
       console.error(err);
@@ -101,7 +112,7 @@ useEffect(() => {
       setLoading(false);
     }
   };
- 
+
   if (loadingUser) {
     return <div className="text-white text-center mt-40">Loading...</div>;
   }
@@ -130,7 +141,10 @@ useEffect(() => {
           <h2 className="text-3xl font-semibold tracking-wide">Set Password</h2>
 
           <p className="text-gray-300 text-base sm:text-lg md:text-xl mt-2 text-center">
-            Login for <span className="text-purple-300 font-semibold text-lg sm:text-xl md:text-2xl">{email}</span>
+            Login for{" "}
+            <span className="text-purple-300 font-semibold text-lg sm:text-xl md:text-2xl">
+              {email}
+            </span>
           </p>
         </div>
 
@@ -180,3 +194,4 @@ useEffect(() => {
     </div>
   );
 }
+
