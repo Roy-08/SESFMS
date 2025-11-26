@@ -17,28 +17,35 @@ export default function LinkLoginPage() {
   const [loading, setLoading] = useState(false);
 
  
-  useEffect(() => {
-    async function fetchUser() {
-      try {
-        const res = await fetch(`/api/getUserByLinkId?linkId=${linkId}`);
-        const data = await res.json();
+useEffect(() => {
+  async function fetchUser() {
+    try {
+      const res = await fetch(`/api/getUserByLinkId?linkId=${linkId}`);
+      const data = await res.json();
 
-        if (!res.ok) {
-          toast.error("Invalid login link");
-          setLoadingUser(false);
-          return;
-        }
-
-        setEmail(data.email);
-      } catch (err) {
-        toast.error("Unable to load user");
-      } finally {
+      if (!res.ok) {
+        toast.error("Invalid login link");
         setLoadingUser(false);
+        return;
       }
-    }
 
-    fetchUser();
-  }, [linkId]);
+      // ✅ ADD THIS CHECK
+      if (data.hasPassword) {
+        router.push(`/login/${linkId}`);
+        return;
+      }
+
+      setEmail(data.email);
+    } catch (err) {
+      toast.error("Unable to load user");
+    } finally {
+      setLoadingUser(false);
+    }
+  }
+
+  fetchUser();
+}, [linkId]);
+
 
   const doLogin = async (e) => {
     e.preventDefault();
@@ -94,7 +101,7 @@ export default function LinkLoginPage() {
       setLoading(false);
     }
   };
-
+ 
   if (loadingUser) {
     return <div className="text-white text-center mt-40">Loading...</div>;
   }
@@ -173,6 +180,3 @@ export default function LinkLoginPage() {
     </div>
   );
 }
-
-
-
