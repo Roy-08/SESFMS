@@ -106,7 +106,7 @@ export default async function AdminPage() {
               animate-fireGlow
             "
           >
-            Admin Dashboard
+            MIS Dashboard
           </h1>
         </header>
 
@@ -134,4 +134,5 @@ export default async function AdminPage() {
     </div>
   );
 }
+
 
