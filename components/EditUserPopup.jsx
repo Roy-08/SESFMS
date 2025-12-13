@@ -15,7 +15,6 @@ function getCroppedImg(image, crop) {
   canvas.height = crop.height;
 
   const ctx = canvas.getContext("2d");
-
   ctx.drawImage(
     image,
     crop.x * scaleX,
@@ -149,21 +148,29 @@ export default function EditUserPopup({ user, onClose, onUpdate }) {
     setUrl("");
   };
 
+  const deleteExisting = (i) => {
+    setExistingLinks(existingLinks.filter((_, idx) => idx !== i));
+  };
+
+  const deleteCustom = (i) => {
+    setCustomLinks(customLinks.filter((_, idx) => idx !== i));
+  };
+
   return (
     <Portal>
       <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 p-4">
-        <div className="w-[95%] max-w-6xl h-[90%] rounded-3xl flex overflow-hidden bg-gradient-to-br from-[#1A1A2E] via-[#2B124C] to-[#F37821]/50">
+        <div className="w-[95%] max-w-6xl h-[90%] rounded-3xl flex overflow-hidden bg-gradient-to-br from-[#1A1A2E]/90 via-[#2B124C]/85 to-[#F37821]/50 border border-white/10">
 
-          {/* LEFT */}
-          <div className="w-1/3 p-8 flex flex-col overflow-y-auto">
+          {/* LEFT PANEL */}
+          <div className="w-1/3 p-8 flex flex-col overflow-y-auto bg-white/5 backdrop-blur-xl border-r border-white/10">
             <h2 className="text-3xl font-bold mb-6 text-orange-300">
               User Controls
             </h2>
 
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center gap-3">
               <img
                 src={profilePreview}
-                className="w-28 h-28 rounded-full object-cover"
+                className="w-28 h-28 rounded-full object-cover border-2 border-white/20 shadow-lg"
               />
 
               <input
@@ -183,83 +190,145 @@ export default function EditUserPopup({ user, onClose, onUpdate }) {
 
               <label
                 htmlFor="profileUpload"
-                className="mt-4 px-4 py-2 bg-orange-400 rounded-lg cursor-pointer"
+                className="mt-2 px-4 py-2 rounded-lg cursor-pointer bg-gradient-to-r from-orange-500 to-yellow-400 text-black font-semibold"
               >
                 Choose Image
               </label>
 
               <button
                 onClick={() => setShowCropper(true)}
-                className="mt-3 px-4 py-2 bg-blue-500 text-white rounded-lg"
+                className="mt-2 px-4 py-2 rounded-lg bg-blue-500 text-white"
               >
                 Edit Image
               </button>
             </div>
 
-            <div className="mt-auto space-y-3">
+            <div className="mt-6 text-gray-200 space-y-2 text-sm">
+              <p><b className="text-orange-300">Name:</b> {user.name}</p>
+              <p><b className="text-orange-300">Email:</b> {user.email}</p>
+              <p><b className="text-orange-300">Employee ID:</b> {user.employeeId}</p>
+            </div>
+
+            <div className="mt-auto flex flex-col gap-3">
               <button
                 onClick={handleSave}
-                className="w-full py-3 bg-orange-500 rounded-xl"
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-orange-500 to-yellow-400 text-white font-bold"
               >
                 Save Changes
               </button>
+
               <button
                 onClick={onClose}
-                className="w-full py-3 bg-white/10 rounded-xl"
+                className="w-full py-3 rounded-xl bg-white/10 text-white hover:bg-white/20"
               >
                 Cancel
               </button>
             </div>
           </div>
 
-          {/* RIGHT */}
-          <div className="w-2/3 p-8 overflow-y-auto text-white">
-            <input
-              value={`${baseUrl}/login-link/${newLinkId}`}
-              readOnly
-              className="w-full p-3 mb-4 bg-white/10 rounded-xl"
-            />
+          {/* RIGHT PANEL */}
+          <div className="w-2/3 p-8 overflow-y-auto text-white flex flex-col gap-4">
+            <div>
+              <label className="text-lg font-semibold text-orange-300">Login URL</label>
+              <input
+                value={`${baseUrl}/login-link/${newLinkId}`}
+                readOnly
+                className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-gray-200 mb-4"
+              />
+            </div>
 
-            <input
-              value={newLinkId}
-              onChange={(e) => setNewLinkId(e.target.value)}
-              className="w-full p-3 mb-6 bg-white/10 rounded-xl"
-            />
+            <div>
+              <label className="text-lg font-semibold text-orange-300">Login ID</label>
+              <input
+                value={newLinkId}
+                onChange={(e) => setNewLinkId(e.target.value)}
+                className="w-full p-3 rounded-xl bg-white/10 border border-white/20 mb-6"
+              />
+            </div>
 
-            <button
-              onClick={() => setShowFields(!showFields)}
-              className="px-4 py-2 bg-orange-400 text-black rounded-lg"
-            >
-              Add New Button
-            </button>
+            <div>
+              <button
+                onClick={() => setShowFields(!showFields)}
+                className="px-4 py-2 bg-orange-400 text-black rounded-lg mb-2"
+              >
+                {showFields ? "Hide" : "Add New Button"}
+              </button>
 
-            {showFields && (
-              <div className="mt-4">
-                <input
-                  placeholder="Title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="w-full p-3 mb-2 bg-white/10 rounded-xl"
-                />
-                <input
-                  placeholder="URL"
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                  className="w-full p-3 mb-2 bg-white/10 rounded-xl"
-                />
-                <button
-                  onClick={addCustom}
-                  className="w-full py-2 bg-green-500 rounded-xl"
-                >
-                  Add Button
-                </button>
-              </div>
-            )}
+              {showFields && (
+                <div className="flex flex-col gap-2 bg-white/10 p-4 rounded-xl border border-white/20 mb-4">
+                  <input
+                    placeholder="Title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="w-full p-3 rounded-xl bg-white/10 border border-white/20"
+                  />
+                  <input
+                    placeholder="URL"
+                    value={url}
+                    onChange={(e) => setUrl(e.target.value)}
+                    className="w-full p-3 rounded-xl bg-white/10 border border-white/20"
+                  />
+                  <button
+                    onClick={addCustom}
+                    className="w-full py-2 bg-green-500 rounded-xl"
+                  >
+                    + Add Button
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Existing buttons */}
+            <div>
+              {existingLinks.length > 0 && (
+                <div className="mb-4">
+                  <h3 className="text-yellow-300 font-bold mb-2">Existing Buttons ({existingLinks.length})</h3>
+                  {existingLinks.map((l, i) => (
+                    <div key={i} className="flex justify-between p-3 mb-2 rounded-xl bg-white/10 border border-white/20">
+                      <div>
+                        <div className="text-yellow-300 font-semibold">{l.title}</div>
+                        <div className="text-gray-300 text-sm">{l.url}</div>
+                      </div>
+                      <button
+                        onClick={() => deleteExisting(i)}
+                        className="px-3 py-1 bg-red-600 rounded-lg"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Newly added buttons */}
+            <div>
+              {customLinks.length > 0 && (
+                <div>
+                  <h4 className="text-yellow-300 font-semibold mb-2">Added Buttons ({customLinks.length})</h4>
+                  {customLinks.map((c, i) => (
+                    <div key={i} className="flex justify-between p-3 mb-2 rounded-xl bg-white/10 border border-white/20">
+                      <div>
+                        <div className="text-orange-300">{c.title}</div>
+                        <div className="text-gray-300 text-sm">{c.url}</div>
+                      </div>
+                      <button
+                        onClick={() => deleteCustom(i)}
+                        className="px-3 py-1 bg-red-600 rounded-lg"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
+
         </div>
       </div>
 
-      {/* -------- IMAGE CROP MODAL -------- */}
+      {/* IMAGE CROP MODAL */}
       {showCropper && (
         <div className="fixed inset-0 z-[10000] bg-black/80 flex items-center justify-center">
           <div className="bg-black p-6 rounded-xl w-[90%] max-w-lg">
@@ -282,15 +351,8 @@ export default function EditUserPopup({ user, onClose, onUpdate }) {
                 onClick={async () => {
                   if (!completedCrop || !imgRef.current) return;
 
-                  const blob = await getCroppedImg(
-                    imgRef.current,
-                    completedCrop
-                  );
-
-                  const file = new File([blob], "profile.jpg", {
-                    type: "image/jpeg",
-                  });
-
+                  const blob = await getCroppedImg(imgRef.current, completedCrop);
+                  const file = new File([blob], "profile.jpg", { type: "image/jpeg" });
                   setProfileFile(file);
                   setProfilePreview(URL.createObjectURL(blob));
                   setShowCropper(false);
@@ -309,7 +371,6 @@ export default function EditUserPopup({ user, onClose, onUpdate }) {
           </div>
         </div>
       )}
-      {/* -------------------------------- */}
     </Portal>
   );
 }
